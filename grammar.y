@@ -10,7 +10,12 @@
 
 %}
 
-%union {int num;} /*Aca creo que van los atributos de la gramatica*/
+%union 
+{
+	int ivalue;
+	char* svalue;
+} 
+
 %start BLOCK
 %token NUMBER
 %token TEXT
@@ -39,6 +44,15 @@
 %token NUM
 %token TEXT_LITERAL
 
+%right IS
+%left PLUS MINUS
+%left MUL DIV MOD
+%left OR
+%left AND
+%left NOT
+%left GT LT 
+%left GE LE EQ NE
+
 %%
 /* Producciones */
 /* Defino block como un bloque generico de codigo */
@@ -54,40 +68,45 @@ LINE	: ASSIGNMENT
 
 STEND	: START BLOCK END;
 
-ASSIGNMENT	: ID IS EXPRESSION;
+ASSIGNMENT	: ID IS EXPRESSION {$$ = $3;};
 
 DECLARATION	: NUMBER ID
 		| TEXT ID;
 
-DEFINITION	: NUMBER ID IS EXPRESSION
-		| TEXT ID IS TEXT_LITERAL;
+DEFINITION	: NUMBER ID IS EXPRESSION {$2->ivalue = $4->ivalue;}
+		| TEXT ID IS TEXT_LITERAL {$2->svalue = $4->svalue;};
 
-EXPRESSION	: LPARENT EXPRESSION RPARENT
-		| EXPRESSION PLUS EXPRESSION
-		| EXPRESSION MINUS EXPRESSION
-		| EXPRESSION MUL EXPRESSION
-		| EXPRESSION DIV EXPRESSION /* no falta modulo? */
-		| TERM PLUS TERM
-		| TERM MINUS TERM
-		| TERM MUL TERM
-		| TERM DIV TERM
-		| TERM ;
+EXPRESSION	: LPARENT EXPRESSION RPARENT {$$ = $2;}
+		| EXPRESSION PLUS EXPRESSION {$$ =$1 + $3;}
+		| EXPRESSION MINUS EXPRESSION {$$ = $1 - $3;}
+		| EXPRESSION MUL EXPRESSION {$$ = $1 * $3;}
+		| EXPRESSION DIV EXPRESSION {$$ = $1 / $3;}
+		| TERM PLUS TERM {$$ =$1 + $3;}
+		| TERM MINUS TERM {$$ = $1 - $3;}
+		| TERM MUL TERM {$$ = $1 * $3;}
+		| TERM DIV TERM {if($3 == 0)
+							yerror("divide by zero");
+						else
+							$$ = $1 / $3;}
+		| TERM MOD TERM {$$ = $1 % $3;}
+		| TERM  {$$ = $1;};
 
 /* En C es lo mismo una expresion o una expresion logica pero 
 quizas aca como es mas verborragico convenga separarlas*/
 
-LOGEXP	: NOT LOGEXP
-	| LOGEXP AND LOGEXP
-	| LOGEXP OR LOGEXP
-	| LPARENT LOGEXP RPARENT
-	| EXPRESSION GT EXPRESSION
-	| EXPRESSION LT EXPRESSION
-	| EXPRESSION LE EXPRESSION
-	| EXPRESSION EQ EXPRESSION
-	| EXPRESSION NE EXPRESSION;
+LOGEXP	: NOT LOGEXP {$$ = !$1;}
+	| LOGEXP AND LOGEXP {$$ = $1 && $3;}
+	| LOGEXP OR LOGEXP {$$ = $1 || $3;}
+	| LPARENT LOGEXP RPARENT {($$ = $2;)}
+	| EXPRESSION GT EXPRESSION {$$ = ($1 > $3);}
+	| EXPRESSION LT EXPRESSION {$$ = ($1 < $3);}
+	| EXPRESSION LE EXPRESSION {$$ = ($1 <= $3);}
+	| EXPRESSION GE EXPRESSION {$$ = ($1 >= $3);}
+	| EXPRESSION EQ EXPRESSION {$$ = ($1 == $3);}
+	| EXPRESSION NE EXPRESSION {$$ = ($1 != $3);};
 
-TERM	: ID
-	| NUM;
+TERM	: ID {$$ = $1;}
+	| NUM {$$ = $1;};
 
 %%
 

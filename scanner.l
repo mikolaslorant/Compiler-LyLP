@@ -43,11 +43,12 @@ digit [0-9]
 
 
 
-"is"								return IS;
+"is"							return IS;
 "+"								return PLUS;
 "-"								return MINUS;
 "*"								return MUL;
 "/"								return DIV;
+"%"								return MOD;
 
 "("								{open_parentheses++; return LPARENT}
 ")"								{open_parentheses--; 
@@ -61,10 +62,10 @@ digit [0-9]
 "{"								yyerror("unrecognized token {");
 "}"								yyerror("unrecognized token }");
 
-"is greater than"					return GT;
-"is less than"						return LT;
-"is greater than or equal to"				return GE;
-"is less than or equal to"				return LE;
+"is greater than"				return GT;
+"is less than"					return LT;
+"is greater than or equal to"	return GE;
+"is less than or equal to"		return LE;
 "equals"						return EQ;
 "not equal to"						return NE;
 "and"							return AND;
@@ -85,9 +86,9 @@ digit [0-9]
 ""
 "\t"							/*ignore tabs*/
 
-{alpha}({alpha}|{digit})*				return ID;
-{digit}+						return NUM;
-\"(\\.|[^"\\])*\"					return TEXT_LITERAL;
+{alpha}({alpha}|{digit})*		return ID;
+{digit}+						{yylval.ivalue = atoi(yytext);return NUM;}
+\"(\\.|[^"\\])*\"				{yylval.svalue = yytext; return TEXT_LITERAL;}	
 
 "/*" 							BEGIN(comment);
 <comment>[^*\n]*
