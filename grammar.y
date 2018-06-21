@@ -80,7 +80,10 @@ EXPRESSION	: LPARENT EXPRESSION RPARENT {$$ = $2;}
 		| EXPRESSION PLUS EXPRESSION {$$ =$1 + $3;}
 		| EXPRESSION MINUS EXPRESSION {$$ = $1 - $3;}
 		| EXPRESSION MUL EXPRESSION {$$ = $1 * $3;}
-		| EXPRESSION DIV EXPRESSION {$$ = $1 / $3;}
+		| EXPRESSION DIV EXPRESSION {if($3 == 0)
+										yerror("divide by zero");
+									else
+										$$ = $1 / $3;
 		| TERM PLUS TERM {$$ =$1 + $3;}
 		| TERM MINUS TERM {$$ = $1 - $3;}
 		| TERM MUL TERM {$$ = $1 * $3;}
