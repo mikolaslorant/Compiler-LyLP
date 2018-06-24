@@ -98,12 +98,11 @@ STEND	: START BLOCK END {$$ = strcatN(3,"{\n", $2,"}\n")};
 
 ASSIGNMENT	: ID IS EXPRESSION {$$ = strcatN(4,$1,"=",$3,";");};
 
-DECLARATION	: NUMBER_T ID { insertSymbol((char*)$2, TYPE_NUMBER);
-}
-		| TEXT_T ID { insertSymbol((char*)$2, TYPE_TEXT); };
+DECLARATION	: NUMBER_T ID { insertSymbol((char*)$2, TYPE_NUMBER); $$ = strcatN(3,"int ",$2,";"); }
+		| TEXT_T ID { insertSymbol((char*)$2, TYPE_TEXT); $$ = strcatN(3,"char* ",$2,";"); };
 
-DEFINITION	: NUMBER_T ID IS EXPRESSION { insertSymbol((char*)$2, TYPE_NUMBER); $2->ivalue = $4->ivalue; }
-		| TEXT_T ID IS TEXT_C { insertSymbol((char*)$2, TYPE_TEXT); $2->svalue = $4->svalue; };
+DEFINITION	: NUMBER_T ID IS EXPRESSION { insertSymbol((char*)$2, TYPE_NUMBER); $$ = strcatN(5,"int ",$2,"=",$4,";"); }
+		| TEXT_T ID IS TEXT_C { insertSymbol((char*)$2, TYPE_TEXT); $$ = strcatN(5,"char* ",$2,"=",$4,";"); };
 
 EXPRESSION	: LPARENT EXPRESSION RPARENT {$$ = strcatN(3,"(",$2,")");}
 		| EXPRESSION PLUS EXPRESSION {$$ = strcatN(5,"(",$1,")+(",$3,")";}
