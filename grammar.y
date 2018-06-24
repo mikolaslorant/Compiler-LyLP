@@ -68,39 +68,44 @@
 %%
 
 /* Producciones */
-PROGRAM		: START BLOCK END {printf("%s\n", $1);}
-;
+PROGRAM		: STEND {printf("%s",strcatN(3,"int main(void)\n{",$1,"\n}"));};
 
 /* Defino block como un bloque generico de codigo */
-BLOCK 	: LINE END_STATEMENT
-	| IF LOGEXP STEND
-	| IF LOGEXP STEND ELSE STEND
-	| DO STEND WHILE LOGEXP
-	| LINE BLOCK;
+BLOCK 	: LINE END_STATEMENT {$$ = strcatN(2, $1, ";");}
+	| IF LOGEXP STEND {$$ = strcatN(4, "if(", $2,")\n", $3);}
+	| IF LOGEXP STEND ELSE STEND {$$ = strcatN(6, "if(", $2,")\n", $3, "else\n", $5);}
+	| DO STEND WHILE LOGEXP {$$ = strcatN(5, "do\n", $2,"while(", $4, ");\n");}
+	| LINE END_STATEMENT BLOCK {$$ = strcatN(3, $1, ";\n", $3);};
 
-LINE	: ASSIGNMENT
-	| DECLARATION
-	| DEFINITION
+LINE	: ASSIGNMENT {$$ = $1}
+	| DECLARATION {$$ = $1}
+	| DEFINITION {$$ = $1}
 	;
 
-STEND	: START BLOCK END;
+STEND	: START BLOCK END {$$ = strcatN(3,"{\n", $2,"}\n")};
 
-ASSIGNMENT	: ID IS EXPRESSION {$$ = $3;};
+ASSIGNMENT	: ID IS EXPRESSION {$$ = strcatN(4,$1,"=",$3,";");};
 
-DECLARATION	: NUMBER_T ID { insertSymbol((char*)$2, TYPE_NUMBER); }
+DECLARATION	: NUMBER_T ID { insertSymbol((char*)$2, TYPE_NUMBER);
+}
 		| TEXT_T ID { insertSymbol((char*)$2, TYPE_TEXT); };
 
 DEFINITION	: NUMBER_T ID IS EXPRESSION { insertSymbol((char*)$2, TYPE_NUMBER); $2->ivalue = $4->ivalue; }
 		| TEXT_T ID IS TEXT_C { insertSymbol((char*)$2, TYPE_TEXT); $2->svalue = $4->svalue; };
 
-EXPRESSION	: LPARENT EXPRESSION RPARENT {$$ = $2;}
-		| EXPRESSION PLUS EXPRESSION {$$ =$1 + $3;}
-		| EXPRESSION MINUS EXPRESSION {$$ = $1 - $3;}
-		| EXPRESSION MUL EXPRESSION {$$ = $1 * $3;}
-		| EXPRESSION DIV EXPRESSION {if($3 == 0)
-										yerror("divide by zero");
-									else
-										$$ = $1 / $3;
+EXPRESSION	: LPARENT EXPRESSION RPARENT {$$ = strcatN(3,"(",$2,")");}
+		| EXPRESSION PLUS EXPRESSION {$$ = strcatN(4,"(",$1,")+(",$3,")";}
+		| EXPRESSION MINUS EXPRESSION {$$ = strcatN(4,"(",$1,")-(",$3,")";}
+		| EXPRESSION MUL EXPRESSION {$$ = strcatN(4,"(",$1,")*(",$3,")";}
+		| EXPRESSION DIV EXPRESSION {if(atoi($3) == 0)
+																	yerror("divide by zero error");
+																		else
+																$$ = {$$ = strcatN(4,"(",$1,")/(",$3,")";};
+		| EXPRESSION MOD EXPRESSION {if(atoi($3) == 0)
+																		yerror("division by zero not defined");
+																		else
+																$$ = {$$ = strcatN(4,"(",$1,")%(",$3,")";};
+
 		| TERM  {$$ = $1;};
 
 /* En C es lo mismo una expresion o una expresion logica pero
@@ -121,7 +126,7 @@ LOGEXP	: NOT LOGEXP {$$ = !$1;}
 
 TERM	: ID {$$ = $1;}
 	| NUM_C {$$ = $1;}
-	| TEXT_C;
+	| TEXT_C {$$ = $1;};
 
 %%
 
