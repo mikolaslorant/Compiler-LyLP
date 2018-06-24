@@ -23,7 +23,7 @@ int linenum = 1;
 int open_parentheses = 0;
 int open_braces = 0;
 
-	
+
 %}
 
 %option noyywrap
@@ -36,8 +36,8 @@ digit [0-9]
 
 
 
-"number"						return NUMBER;
-"text"							return TEXT;
+"number"						return NUMBER_T;
+"text"							return TEXT_T;
 
 
 
@@ -51,8 +51,8 @@ digit [0-9]
 "%"								return MOD;
 
 "("								{open_parentheses++; return LPARENT}
-")"								{open_parentheses--; 
-								if(open_parentheses < 0) 
+")"								{open_parentheses--;
+								if(open_parentheses < 0)
 									yyerror("extra closing parentheses");
 								else
 									return RPAREN;
@@ -69,26 +69,26 @@ digit [0-9]
 "equals"						return EQ;
 "not equal to"						return NE;
 "and"							return AND;
-"or"							return OR;	
+"or"							return OR;
 
 "if"							return IF;
 "else"							return ELSE;
 "do"							return DO;
-"until"							return UNTIL;
+"while"							return WHILE;
 "not"							return NOT;
 
 
 
 "." 							return END_STATEMENT
-"start"							return START;
+"start"						return START;
 "end"							return END;
 "\n"							{linenum++;}
 ""
 "\t"							/*ignore tabs*/
 
-{alpha}({alpha}|{digit})*		return ID;
-{digit}+						{yylval.ivalue = atoi(yytext);return NUM;}
-\"(\\.|[^"\\])*\"				{yylval.svalue = yytext; return TEXT_LITERAL;}	
+{alpha}({alpha}|{digit})*		{yyvsl.string = yytext; return ID;
+{digit}+						{yylval.string = yytext;return NUM_C;}
+\"(\\.|[^"\\])*\"				{yylval.string = yytext; return TEXT_C;}
 
 "/*" 							BEGIN(comment);
 <comment>[^*\n]*
@@ -97,9 +97,3 @@ digit [0-9]
 <comment>"*"+"/"				BEGIN(INITIAL);
 
 %%
-
-int main(int argc, char *argv[])
-{
-	yylex();
-	printf("# of lines = %d\n", linenum);
-}

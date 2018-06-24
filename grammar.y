@@ -1,33 +1,35 @@
+/*https://www.tutorialspoint.com/cprogramming/c_variable_arguments.htm*/
 %{
 	#include <stdio.h>
 	#include <stdlib.h>
+	#include <stdarg.h>
 
 	#define MAX_SYMBOLS 100
 	#define MAX_SYMBOL_LENGTH 100
 
 	#define TYPE_NUMBER 1
 	#define TYPE_TEXT 2
-	
+
 	extern int yylex();
 	extern int linenum;
 
 	char symbolTable[MAX_SYMBOL_LENGTH][MAX_SYMBOLS];
 	int symbols = 0, symbolType[MAX_SYMBOLS];
 	int index;
-	
+
 	void yyerror(cont char* s);
 %}
 
-%union 
+%union
 {
-	int ivalue;
-	char * svalue;
-} 
+	char* string;
+}
 
-%start PROGRAM
-%token BLOCK
-%token NUMBER
-%token TEXT
+
+%start<string> PROGRAM
+%token<string> BLOCK
+%token<string> NUMBER_T
+%token<string> TEXT_T
 %token IS
 %token PLUS
 %token MINUS
@@ -43,15 +45,16 @@
 %token NE
 %token AND
 %token OR
-%token IF
-%token ELSE
-%token DO
-%token UNTIL
-%token NOT
-%token END
-%token ID
-%token NUM
-%token TEXT_LITERAL
+%token<string> IF
+%token<string> ELSE
+%token<string> DO
+%token<string> WHILE
+%token<string> NOT
+%token<string> START
+%token<string> END
+%token<string> ID
+%token<string> NUM_C
+%token<string> TEXT_C
 
 %right IS
 %left PLUS MINUS
@@ -59,34 +62,36 @@
 %left OR
 %left AND
 %left NOT
-%left GT LT 
+%left GT LT
 %left GE LE EQ NE
 
 %%
 
 /* Producciones */
-PROGRAM		: BLOCK {printf("%s\n", $1);};
+PROGRAM		: START BLOCK END {printf("%s\n", $1);}
+;
 
 /* Defino block como un bloque generico de codigo */
-BLOCK 	: LINE END_STATEMENT 
-	| IF EXPRESSION STEND
-	| IF EXPRESSION STEND ELSE BLOCK
-	| DO START BLOCK END UNTIL EXPRESION
+BLOCK 	: LINE END_STATEMENT
+	| IF LOGEXP STEND
+	| IF LOGEXP STEND ELSE STEND
+	| DO STEND WHILE LOGEXP
 	| LINE BLOCK;
 
 LINE	: ASSIGNMENT
 	| DECLARATION
-	| DEFINITION;
+	| DEFINITION
+	;
 
 STEND	: START BLOCK END;
 
 ASSIGNMENT	: ID IS EXPRESSION {$$ = $3;};
 
-DECLARATION	: NUMBER ID { insertSymbol((char*)$2, TYPE_NUMBER); }
-		| TEXT ID { insertSymbol((char*)$2, TYPE_TEXT); };
+DECLARATION	: NUMBER_T ID { insertSymbol((char*)$2, TYPE_NUMBER); }
+		| TEXT_T ID { insertSymbol((char*)$2, TYPE_TEXT); };
 
-DEFINITION	: NUMBER ID IS EXPRESSION { insertSymbol((char*)$2, TYPE_NUMBER); $2->ivalue = $4->ivalue; }
-		| TEXT ID IS TEXT_LITERAL { insertSymbol((char*)$2, TYPE_TEXT); $2->svalue = $4->svalue; };
+DEFINITION	: NUMBER_T ID IS EXPRESSION { insertSymbol((char*)$2, TYPE_NUMBER); $2->ivalue = $4->ivalue; }
+		| TEXT_T ID IS TEXT_C { insertSymbol((char*)$2, TYPE_TEXT); $2->svalue = $4->svalue; };
 
 EXPRESSION	: LPARENT EXPRESSION RPARENT {$$ = $2;}
 		| EXPRESSION PLUS EXPRESSION {$$ =$1 + $3;}
@@ -96,23 +101,17 @@ EXPRESSION	: LPARENT EXPRESSION RPARENT {$$ = $2;}
 										yerror("divide by zero");
 									else
 										$$ = $1 / $3;
-		| TERM PLUS TERM {$$ =$1 + $3;}
-		| TERM MINUS TERM {$$ = $1 - $3;}
-		| TERM MUL TERM {$$ = $1 * $3;}
-		| TERM DIV TERM {if($3 == 0)
-							yerror("divide by zero");
-						else
-							$$ = $1 / $3;}
-		| TERM MOD TERM {$$ = $1 % $3;}
 		| TERM  {$$ = $1;};
 
-/* En C es lo mismo una expresion o una expresion logica pero 
+/* En C es lo mismo una expresion o una expresion logica pero
 quizas aca como es mas verborragico convenga separarlas*/
 
 LOGEXP	: NOT LOGEXP {$$ = !$1;}
 	| LOGEXP AND LOGEXP {$$ = $1 && $3;}
 	| LOGEXP OR LOGEXP {$$ = $1 || $3;}
 	| LPARENT LOGEXP RPARENT {($$ = $2;)}
+	| LPARENT LOGEXP EQ LOGEXP RPARENT
+	| LPARENT LOGEXP NE LOGEXP RPARENT
 	| EXPRESSION GT EXPRESSION {$$ = ($1 > $3);}
 	| EXPRESSION LT EXPRESSION {$$ = ($1 < $3);}
 	| EXPRESSION LE EXPRESSION {$$ = ($1 <= $3);}
@@ -121,7 +120,8 @@ LOGEXP	: NOT LOGEXP {$$ = !$1;}
 	| EXPRESSION NE EXPRESSION {$$ = ($1 != $3);};
 
 TERM	: ID {$$ = $1;}
-	| NUM {$$ = $1;};
+	| NUM_C {$$ = $1;}
+	| TEXT_C;
 
 %%
 
@@ -131,11 +131,34 @@ void yyerror(char const* s)
 	exit(1);
 }
 
+char* strcatN(int num, ...)
+{
+	int i, length;
+	char* toAdd, ret;
+
+	va_list strings;
+	va_start(strings, num);
+	toAdd = va_arg(strings, char*);
+
+	length = strlen(toAdd + 1);
+	ret = (char*)malloc(sizeof(char) * length));
+	strcpy(ret, toAdd);
+	for(i = 1; i < num ; i++)
+	{
+		toAdd = va_arg(strings, char*);
+		length += strlen(toAdd);
+		ret = (char*)realloc(args, length * sizeof(char));
+		strcat(args, toAdd);
+	}
+	va_end(strings);
+	return ret;
+}
+
 void insertSymbol(char * symbol, int symbolType)
 {
  	for(index = 0; index < symbols; index++) {
 		if(strcmp(symbol, symbolTable[index]) == 0) {
-			if(type[i] == symbolType) 
+			if(type[i] == symbolType)
 				yyerror("Redeclaration of variable");
 			else
 				yyerror("Multiple Declaration of Variable");
@@ -145,4 +168,8 @@ void insertSymbol(char * symbol, int symbolType)
 	symbolType[symbols] = symbolType;
 	strcpy(symbolTable[symbols], symbol);
 	symbols++;
+}
+
+int main(void){
+	yyparse();
 }
