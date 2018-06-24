@@ -1,22 +1,31 @@
 %{
 	#include <stdio.h>
 	#include <stdlib.h>
+
+	#define MAX_SYMBOLS 100
+	#define MAX_SYMBOL_LENGTH 100
+
+	#define TYPE_NUMBER 1
+	#define TYPE_TEXT 2
 	
 	extern int yylex();
 	extern int linenum;
+
+	char symbolTable[MAX_SYMBOL_LENGTH][MAX_SYMBOLS];
+	int symbols = 0, symbolType[MAX_SYMBOLS];
+	int index;
 	
 	void yyerror(cont char* s);
-
-
 %}
 
 %union 
 {
 	int ivalue;
-	char* svalue;
+	char * svalue;
 } 
 
-%start BLOCK
+%start PROGRAM
+%token BLOCK
 %token NUMBER
 %token TEXT
 %token IS
@@ -54,7 +63,10 @@
 %left GE LE EQ NE
 
 %%
+
 /* Producciones */
+PROGRAM		: BLOCK {printf("%s\n", $1);};
+
 /* Defino block como un bloque generico de codigo */
 BLOCK 	: LINE END_STATEMENT 
 	| IF EXPRESSION STEND
@@ -70,11 +82,11 @@ STEND	: START BLOCK END;
 
 ASSIGNMENT	: ID IS EXPRESSION {$$ = $3;};
 
-DECLARATION	: NUMBER ID
-		| TEXT ID;
+DECLARATION	: NUMBER ID { insertSymbol((char*)$2, TYPE_NUMBER); }
+		| TEXT ID { insertSymbol((char*)$2, TYPE_TEXT); };
 
-DEFINITION	: NUMBER ID IS EXPRESSION {$2->ivalue = $4->ivalue;}
-		| TEXT ID IS TEXT_LITERAL {$2->svalue = $4->svalue;};
+DEFINITION	: NUMBER ID IS EXPRESSION { insertSymbol((char*)$2, TYPE_NUMBER); $2->ivalue = $4->ivalue; }
+		| TEXT ID IS TEXT_LITERAL { insertSymbol((char*)$2, TYPE_TEXT); $2->svalue = $4->svalue; };
 
 EXPRESSION	: LPARENT EXPRESSION RPARENT {$$ = $2;}
 		| EXPRESSION PLUS EXPRESSION {$$ =$1 + $3;}
@@ -117,4 +129,20 @@ void yyerror(char const* s)
 {
 	printf(stderr, "ERROR: %s on line %d\n", s, linenum);
 	exit(1);
+}
+
+void insertSymbol(char * symbol, int symbolType)
+{
+ 	for(index = 0; index < symbols; index++) {
+		if(strcmp(symbol, symbolTable[index]) == 0) {
+			if(type[i] == symbolType) 
+				yyerror("Redeclaration of variable");
+			else
+				yyerror("Multiple Declaration of Variable");
+		}
+	}
+
+	symbolType[symbols] = symbolType;
+	strcpy(symbolTable[symbols], symbol);
+	symbols++;
 }
