@@ -94,35 +94,35 @@ DEFINITION	: NUMBER_T ID IS EXPRESSION { insertSymbol((char*)$2, TYPE_NUMBER); $
 		| TEXT_T ID IS TEXT_C { insertSymbol((char*)$2, TYPE_TEXT); $2->svalue = $4->svalue; };
 
 EXPRESSION	: LPARENT EXPRESSION RPARENT {$$ = strcatN(3,"(",$2,")");}
-		| EXPRESSION PLUS EXPRESSION {$$ = strcatN(4,"(",$1,")+(",$3,")";}
-		| EXPRESSION MINUS EXPRESSION {$$ = strcatN(4,"(",$1,")-(",$3,")";}
-		| EXPRESSION MUL EXPRESSION {$$ = strcatN(4,"(",$1,")*(",$3,")";}
+		| EXPRESSION PLUS EXPRESSION {$$ = strcatN(5,"(",$1,")+(",$3,")";}
+		| EXPRESSION MINUS EXPRESSION {$$ = strcatN(5,"(",$1,")-(",$3,")";}
+		| EXPRESSION MUL EXPRESSION {$$ = strcatN(5,"(",$1,")*(",$3,")";}
 		| EXPRESSION DIV EXPRESSION {if(atoi($3) == 0)
 																	yerror("divide by zero error");
 																		else
-																$$ = {$$ = strcatN(4,"(",$1,")/(",$3,")";};
+																$$ = {$$ = strcatN(5,"(",$1,")/(",$3,")";};
 		| EXPRESSION MOD EXPRESSION {if(atoi($3) == 0)
 																		yerror("division by zero not defined");
 																		else
-																$$ = {$$ = strcatN(4,"(",$1,")%(",$3,")";};
+																$$ = {$$ = strcatN(5,"(",$1,")%(",$3,")";};
 
 		| TERM  {$$ = $1;};
 
 /* En C es lo mismo una expresion o una expresion logica pero
 quizas aca como es mas verborragico convenga separarlas*/
 
-LOGEXP	: NOT LOGEXP {$$ = !$1;}
-	| LOGEXP AND LOGEXP {$$ = $1 && $3;}
-	| LOGEXP OR LOGEXP {$$ = $1 || $3;}
-	| LPARENT LOGEXP RPARENT {($$ = $2;)}
-	| LPARENT LOGEXP EQ LOGEXP RPARENT
-	| LPARENT LOGEXP NE LOGEXP RPARENT
-	| EXPRESSION GT EXPRESSION {$$ = ($1 > $3);}
-	| EXPRESSION LT EXPRESSION {$$ = ($1 < $3);}
-	| EXPRESSION LE EXPRESSION {$$ = ($1 <= $3);}
-	| EXPRESSION GE EXPRESSION {$$ = ($1 >= $3);}
-	| EXPRESSION EQ EXPRESSION {$$ = ($1 == $3);}
-	| EXPRESSION NE EXPRESSION {$$ = ($1 != $3);};
+LOGEXP	: NOT LOGEXP {$$ = strcatN(3,"(!(",$2,"))");}
+	| LOGEXP AND LOGEXP {$$ = strcatN(5,"(",$1,"&&",$3,")");}
+	| LOGEXP OR LOGEXP {$$ = strcatN(5,"(",$1,"||",$3,")");}
+	| LPARENT LOGEXP RPARENT {$$ = strcatN(3,"(",$2,")");}
+	| LPARENT LOGEXP RPARENT EQ LPARENT LOGEXP RPARENT {$$ = strcatN(5,"(",$2,"==",$6,")");}
+	| LPARENT LOGEXP RPARENT NE LPARENT LOGEXP RPARENT {$$ = strcatN(5,"(",$2,"!=",$6,")");}
+	| EXPRESSION GT EXPRESSION {$$ = strcatN(5,"(",$1,">",$3,")");}
+	| EXPRESSION LT EXPRESSION {$$ = strcatN(5,"(",$1,"<",$3,")");}
+	| EXPRESSION LE EXPRESSION {$$ = strcatN(5,"(",$1,"<=",$3,")");}
+	| EXPRESSION GE EXPRESSION {$$ = strcatN(5,"(",$1,">=",$3,")");}
+	| EXPRESSION EQ EXPRESSION {$$ = strcatN(5,"(",$1,"==",$3,")");}
+	| EXPRESSION NE EXPRESSION {$$ = strcatN(5,"(",$1,"!=",$3,")");};
 
 TERM	: ID {$$ = $1;}
 	| NUM_C {$$ = $1;}
