@@ -26,10 +26,10 @@
 }
 
 
-%start<string> PROGRAM
-%token<string> BLOCK
+
 %token<string> NUMBER_T
 %token<string> TEXT_T
+
 %token IS
 %token PLUS
 %token MINUS
@@ -64,6 +64,18 @@
 %left NOT
 %left GT LT
 %left GE LE EQ NE
+
+%type<string> PROGRAM
+%type<string> BLOCK
+%type<string> LINE
+%type<string> STEND
+%type<string> ASSIGNMENT
+%type<string> EXPRESSION
+%type<string> DECLARATION
+%type<string> DEFINITION
+%type<string> LOGEXP
+%type<string> TERM
+%start PROGRAM
 
 %%
 
