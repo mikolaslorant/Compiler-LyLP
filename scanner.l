@@ -14,6 +14,11 @@ Code for alpha and digit https://github.com/faturita/YetAnotherCompilerClass/blo
 #include <stdio.h>
 #include <stdlib.h>
 #include "y.tab.h"
+#include "./node.h"
+
+#define TYPE_NOTFOUND 0
+#define TYPE_NUMBER 1
+#define TYPE_TEXT 2
 
 extern void yyerror(const char * msg);
 
@@ -86,9 +91,15 @@ digit [0-9]
 ""
 "\t"							/*ignore tabs*/
 
-{alpha}({alpha}|{digit})*		{yylval.string = yytext; return ID;}
-{digit}+						{yylval.string = yytext;return NUM_C;}
-\"(\\.|[^"\\])*\"				{yylval.string = yytext; return TEXT_C;}
+{alpha}({alpha}|{digit})*		{	char * str = (char*)malloc(strlen(yytext) * sizeof(char));
+									strcpy(str, yytext);
+									yylval.node = newNode(TYPE_TEXT,str); return ID;}
+{digit}+						{	char * str = (char*)malloc(strlen(yytext) * sizeof(char));
+									strcpy(str, yytext);
+									yylval.node = newNode(TYPE_NUMBER,str); return NUM_C;}
+\"(\\.|[^"\\])*\"				{	char * str = (char*)malloc(strlen(yytext) * sizeof(char));
+									strcpy(str, yytext);
+									yylval.node = newNode(TYPE_TEXT,str); return TEXT_C;}
 
 "/*" 							BEGIN(comment);
 <comment>[^*\n]*
