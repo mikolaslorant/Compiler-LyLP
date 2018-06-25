@@ -7,10 +7,10 @@ all: parser
 parser: clean
 		yacc -d grammar.y 
 		flex scanner.l
-		$(GCC) -o parser lex.yy.c y.tab.c -ly $(GCCFLAGS)
+		$(GCC) -o parser lex.yy.c y.tab.c node.c node.h -ly $(GCCFLAGS)
 
 clean:
-	rm -rf *.o *.c *.h
+	rm -rf *.o y.tab.c y.tab.h parser lex.yy.c
 
 test: ./parser < test.lylp > test.out
 

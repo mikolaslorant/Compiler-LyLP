@@ -3,6 +3,7 @@
 	#include <stdio.h>
 	#include <stdlib.h>
 	#include <stdarg.h>
+	#include "node.h"
 
 	#define MAX_SYMBOLS 100
 	#define MAX_SYMBOL_LENGTH 100
