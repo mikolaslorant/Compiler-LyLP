@@ -1,17 +1,18 @@
 include Makefile.inc
 
 
-all: parser 
+all: clean compiler 
 
 
-parser: clean
+compiler: 
 		yacc -d grammar.y 
 		flex scanner.l
-		$(GCC) -o parser lex.yy.c y.tab.c node.c node.h -ly $(GCCFLAGS)
+		$(GCC) -o compiler lex.yy.c y.tab.c node.c node.h -ly $(GCCFLAGS)
 
-clean:
-	rm -rf *.o y.tab.c y.tab.h parser lex.yy.c
+clean: 
+	rm -rf *.o y.tab.c y.tab.h compiler lex.yy.c test.out
 
-test: ./parser < test.lylp > test.out
+test: 
+	./compiler < testcode.lylp > test.out
 
-.PHONY: all test clean
+.PHONY: all test clean compiler
