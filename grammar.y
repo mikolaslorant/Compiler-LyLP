@@ -84,11 +84,11 @@
 PROGRAM		: STEND {printf("%s",strcatN(3,"int main(void)\n{",$1,"\n}"));};
 
 /* Defino block como un bloque generico de codigo */
-BLOCK 	: LINE END_STATEMENT {$$ = strcatN(2, $1, ";");}
+BLOCK 	: LINE END_STATEMENT {$$ = strcatN(2, $1, "\n");}
 	| IF LOGEXP STEND {$$ = strcatN(4, "if(", $2,")\n", $3);}
 	| IF LOGEXP STEND ELSE STEND {$$ = strcatN(6, "if(", $2,")\n", $3, "else\n", $5);}
 	| DO STEND WHILE LOGEXP {$$ = strcatN(5, "do\n", $2,"while(", $4, ");\n");}
-	| LINE END_STATEMENT BLOCK {$$ = strcatN(3, $1, ";\n", $3);};
+	| LINE END_STATEMENT BLOCK {$$ = strcatN(3, $1, "\n", $3);};
 
 LINE	: ASSIGNMENT {$$ = $1}
 	| DECLARATION {$$ = $1}
@@ -112,11 +112,11 @@ EXPRESSION	: LPARENT EXPRESSION RPARENT {$$ = strcatN(3,"(",$2,")");}
 		| EXPRESSION DIV EXPRESSION {if(atoi($3) == 0)
 																	yerror("divide by zero error");
 																		else
-																$$ = {$$ = strcatN(5,"(",$1,")/(",$3,")";};
+																$$ = strcatN(5,"(",$1,")/(",$3,")";}
 		| EXPRESSION MOD EXPRESSION {if(atoi($3) == 0)
 																		yerror("division by zero not defined");
 																		else
-																$$ = {$$ = strcatN(5,"(",$1,")%(",$3,")";};
+																$$ = strcatN(5,"(",$1,")%(",$3,")";};
 
 		| TERM  {$$ = $1;};
 

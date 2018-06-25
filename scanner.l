@@ -66,8 +66,8 @@ digit [0-9]
 "is less than"					return LT;
 "is greater than or equal to"	return GE;
 "is less than or equal to"		return LE;
-"equals"						return EQ;
-"not equal to"						return NE;
+"is equal to"						return EQ;
+"is not equal to"						return NE;
 "and"							return AND;
 "or"							return OR;
 
