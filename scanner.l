@@ -50,7 +50,7 @@ digit [0-9]
 "/"								return DIV;
 "%"								return MOD;
 
-"("								{open_parentheses++; return LPARENT}
+"("								{open_parentheses++; return LPARENT;}
 ")"								{open_parentheses--;
 								if(open_parentheses < 0)
 									yyerror("extra closing parentheses");
@@ -79,14 +79,14 @@ digit [0-9]
 
 
 
-"." 							return END_STATEMENT
+"." 							return END_STATEMENT;
 "start"						return START;
 "end"							return END;
 "\n"							{linenum++;}
 ""
 "\t"							/*ignore tabs*/
 
-{alpha}({alpha}|{digit})*		{yyvsl.string = yytext; return ID;
+{alpha}({alpha}|{digit})*		{yylval.string = yytext; return ID;}
 {digit}+						{yylval.string = yytext;return NUM_C;}
 \"(\\.|[^"\\])*\"				{yylval.string = yytext; return TEXT_C;}
 
