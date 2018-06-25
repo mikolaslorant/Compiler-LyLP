@@ -55,6 +55,7 @@
 %token<string> ID
 %token<string> NUM_C
 %token<string> TEXT_C
+%token<string> END_STATEMENT
 
 %right IS
 %left PLUS MINUS
