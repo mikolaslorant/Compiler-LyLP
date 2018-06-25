@@ -87,7 +87,7 @@ digit [0-9]
 "." 							return END_STATEMENT;
 "start"						return START;
 "end"							return END;
-"\n"							{linenum++;}
+"\n"							{++linenum;}
 ""
 "\t"							/*ignore tabs*/
 
@@ -104,7 +104,7 @@ digit [0-9]
 "/*" 							BEGIN(comment);
 <comment>[^*\n]*
 <comment>"*"+[^*/\n]*
-
+<comment>\n             	++linenum;
 <comment>"*"+"/"				BEGIN(INITIAL);
 
 %%

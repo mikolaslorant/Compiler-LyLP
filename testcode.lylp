@@ -1,13 +1,13 @@
 /*
 	This is a test code
 */
-begin
+start
 	number a.
 	number b.
 	a is 5.
 	b is 8.
 	if (a + b is greater than 5) or (a is not equal to b)
-	begin
+	start
 		a = (a + a).
 	end
 end
