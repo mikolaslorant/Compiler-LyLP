@@ -82,6 +82,8 @@ digit [0-9]
 "while"							return WHILE;
 "not"							return NOT;
 
+"see"							return SEE;
+
 
 
 "." 							return END_STATEMENT;

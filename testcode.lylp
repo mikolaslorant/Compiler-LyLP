@@ -8,6 +8,7 @@ start
 	b is 8.
 	if (a + b is greater than 5) or (a is not equal to b)
 	start
-		a = (a + a).
+		a is a + a.
 	end
+	see a.
 end

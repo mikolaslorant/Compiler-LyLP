@@ -51,6 +51,7 @@
 %token NE
 %token AND
 %token OR
+%token SEE
 %token<node> IF
 %token<node> ELSE
 %token<node> DO
@@ -87,20 +88,29 @@
 %%
 
 /* Producciones */
-PROGRAM		: STEND {printf("%s",strcatN(3,"int main(void)\n{",$1->string,"\n}"));};
+PROGRAM		: STEND {printf("%s",strcatN(3,"#include <stdio.h>\nint main(void)\n{",$1->string,"\n}"));};
 
 /* Defino block como un bloque generico de codigo */
 BLOCK 	: LINE END_STATEMENT {$$ = newNode(TYPE_TEXT, strcatN(2, $1->string, "\n"));}
 	| IF LOGEXP STEND {$$ = newNode(TYPE_TEXT,strcatN(4, "if(", $2->string,")\n", $3->string));}
 	| IF LOGEXP STEND ELSE STEND {$$ = newNode(TYPE_TEXT, strcatN(6, "if(", $2->string,")\n", $3->string, "else\n", $5->string));}
-	| DO STEND WHILE LOGEXP {$$ = newNode(TYPE_TEXT,strcatN(5, "do\n", $2->string,"while(", $4->string, ");\n"));}
+	| DO STEND WHILE LOGEXP  {$$ = newNode(TYPE_TEXT,strcatN(5, "do\n", $2->string,"while(", $4->string, ");\n"));}
+	| IF LOGEXP STEND BLOCK{$$ = newNode(TYPE_TEXT,strcatN(5, "if(", $2->string,")\n", $3->string,"\n", $4->string));}
+	| IF LOGEXP STEND ELSE STEND BLOCK{$$ = newNode(TYPE_TEXT, strcatN(8, "if(", $2->string,")\n", $3->string, "else\n", $5->string,"\n", $6->string));}
+	| DO STEND WHILE LOGEXP BLOCK {$$ = newNode(TYPE_TEXT,strcatN(6, "do\n", $2->string,"while(", $4->string, ");\n",$5->string));}
 	| LINE END_STATEMENT BLOCK {$$ = newNode(TYPE_TEXT, strcatN(3, $1->string, "\n", $3->string));};
 
 LINE	: ASSIGNMENT {$$ = newNode(TYPE_TEXT, $1->string);}
 	| DECLARATION {$$ = newNode(TYPE_TEXT, $1->string);}
-	| DEFINITION {$$ = newNode(TYPE_TEXT, $1->string);};
+	| DEFINITION {$$ = newNode(TYPE_TEXT, $1->string);}
+	| SEE EXPRESSION {if($2->type == TYPE_TEXT)
+						$$ = newNode(TYPE_TEXT, strcatN(3,"printf(\"%s\n\",", $2->string, ");"));
+					else
+						$$ = newNode(TYPE_TEXT, strcatN(3,"printf(\"%d\n\",", $2->string, ");"));
+					};
 
-STEND	: START BLOCK END {$$ = newNode(TYPE_TEXT, strcatN(3,"{\n", $2->string,"}\n"));};
+STEND	: START BLOCK END {$$ = newNode(TYPE_TEXT, strcatN(3,"{\n", $2->string,"}\n"));}
+	| START END {$$ = newNode(TYPE_TEXT, "");};
 
 ASSIGNMENT	: ID IS EXPRESSION {checkType(getType($1->string), $3->type);
 								$$ = newNode($3->type,strcatN(4,$1->string,"=",$3->string,";"));};
