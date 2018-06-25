@@ -89,12 +89,12 @@ PROGRAM		: STEND {printf("%s",strcatN(3,"int main(void)\n{",$1->string,"\n}"));}
 BLOCK 	: LINE END_STATEMENT {$$ = newNode(STRING, strcatN(,2, $1, "\n"));}
 	| IF LOGEXP STEND {$$ = newNode(STRING,strcatN(4, "if(", $2,")\n", $3));}
 	| IF LOGEXP STEND ELSE STEND {$$ = newNode(STRING, strcatN(6, "if(", $2,")\n", $3, "else\n", $5));}
-	| DO STEND WHILE LOGEXP {$$ = strcatN(5, "do\n", $2,"while(", $4, ");\n");}
-	| LINE END_STATEMENT BLOCK {$$ = strcatN(3, $1, "\n", $3);};
+	| DO STEND WHILE LOGEXP {$$ = newNode(STRING,strcatN(5, "do\n", $2,"while(", $4, ");\n"));}
+	| LINE END_STATEMENT BLOCK {$$ = newNode(STRING, strcatN(3, $1, "\n", $3));};
 
-LINE	: ASSIGNMENT {$$ = $1;}
-	| DECLARATION {$$ = $1;}
-	| DEFINITION {$$ = $1;};
+LINE	: ASSIGNMENT {$$ = newNode(STRING, $1);}
+	| DECLARATION {$$ = newNode(STRING, $1);}
+	| DEFINITION {$$ = newNode(STRING, $1);};
 
 STEND	: START BLOCK END {$$ = strcatN(3,"{\n", $2,"}\n");};
 STEND	: START BLOCK END {$$ = newNode(STRING, strcatN(3,"{\n", $2,"}\n"))};
@@ -131,14 +131,14 @@ EXPRESSION	: LPARENT EXPRESSION RPARENT {$$ = newNode($2->type, strcatN(3,"(",$2
 									}
 		| EXPRESSION MUL EXPRESSION {if($1->type == STRING || $3->type == STRING)
 									{
-										yyerror("invalid operation - requires number type.")
+										yyerror("invalid operation * requires number type.")
 									}
 									else
 										$$ = newNode(INTEGER, strcatN(5,"(",$1,")*(",$3,")"));
 									}
 		| EXPRESSION DIV EXPRESSION {if($1->type == STRING || $3->type == STRING)
 									{
-										yyerror("invalid operation - requires number type.")
+										yyerror("invalid operation / requires number type.")
 									}
 									else{
 										if(atoi($3) == 0)
@@ -150,7 +150,7 @@ EXPRESSION	: LPARENT EXPRESSION RPARENT {$$ = newNode($2->type, strcatN(3,"(",$2
 
 		| EXPRESSION MOD EXPRESSION {if($1->type == STRING || $3->type == STRING)
 									{
-										yyerror("invalid operation - requires number type.")
+										yyerror("invalid operation % requires number type.")
 									}
 									else
 									{
@@ -180,8 +180,8 @@ LOGEXP	: NOT LOGEXP {$$ = strcatN(3,"(!(",$2,"))");}
 	| EXPRESSION NE EXPRESSION {$$ = strcatN(5,"(",$1,"!=",$3,")");};
 
 TERM	: ID {$$ = newNode(,$1);}
-	| NUM_C {$$ = $1;}
-	| TEXT_C {$$ = $1;};
+	| NUM_C {$$ = newNode(INTEGER, $1);}
+	| TEXT_C {$$ = newNode(STRING, $1);};
 
 %%
 
