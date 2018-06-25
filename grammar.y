@@ -105,7 +105,7 @@ STEND	: START BLOCK END {$$ = newNode(TYPE_TEXT, strcatN(3,"{\n", $2->string,"}\
 ASSIGNMENT	: ID IS EXPRESSION {checkType(getType($1->string), $3->type);
 								$$ = newNode($3->type,strcatN(4,$1->string,"=",$3->string,";"));};
 
-DECLARATION	: NUMBER_T ID { insertSymbol((char*)$2, TYPE_NUMBER); 
+DECLARATION	: NUMBER_T ID { insertSymbol($2->string, TYPE_NUMBER); 
 							$$ = newNode(TYPE_TEXT,strcatN(3,"int ",$2->string,";")); }
 		| TEXT_T ID { insertSymbol((char*)$2, TYPE_TEXT); 
 					$$ = newNode(TYPE_TEXT, strcatN(3,"char* ",$2->string,";")); };
