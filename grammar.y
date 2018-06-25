@@ -25,7 +25,7 @@
 
 %union
 {
-	char* string;
+	Node* node;
 }
 
 
@@ -83,12 +83,12 @@
 %%
 
 /* Producciones */
-PROGRAM		: STEND {printf("%s",strcatN(3,"int main(void)\n{",$1,"\n}"));};
+PROGRAM		: STEND {printf("%s",strcatN(3,"int main(void)\n{",$1->string,"\n}"));};
 
 /* Defino block como un bloque generico de codigo */
-BLOCK 	: LINE END_STATEMENT {$$ = strcatN(2, $1, "\n");}
-	| IF LOGEXP STEND {$$ = strcatN(4, "if(", $2,")\n", $3);}
-	| IF LOGEXP STEND ELSE STEND {$$ = strcatN(6, "if(", $2,")\n", $3, "else\n", $5);}
+BLOCK 	: LINE END_STATEMENT {$$ = newNode(STRING, strcatN(,2, $1, "\n"));}
+	| IF LOGEXP STEND {$$ = newNode(STRING,strcatN(4, "if(", $2,")\n", $3));}
+	| IF LOGEXP STEND ELSE STEND {$$ = newNode(STRING, strcatN(6, "if(", $2,")\n", $3, "else\n", $5));}
 	| DO STEND WHILE LOGEXP {$$ = strcatN(5, "do\n", $2,"while(", $4, ");\n");}
 	| LINE END_STATEMENT BLOCK {$$ = strcatN(3, $1, "\n", $3);};
 
@@ -97,29 +97,71 @@ LINE	: ASSIGNMENT {$$ = $1;}
 	| DEFINITION {$$ = $1;};
 
 STEND	: START BLOCK END {$$ = strcatN(3,"{\n", $2,"}\n");};
+STEND	: START BLOCK END {$$ = newNode(STRING, strcatN(3,"{\n", $2,"}\n"))};
 
-ASSIGNMENT	: ID IS EXPRESSION {$$ = strcatN(4,$1,"=",$3,";");};
+ASSIGNMENT	: ID IS EXPRESSION {$$ = newNode($3->type,strcatN(4,$1,"=",$3,";"));};
 
-DECLARATION	: NUMBER_T ID { insertSymbol((char*)$2, TYPE_NUMBER); $$ = strcatN(3,"int ",$2,";"); }
-		| TEXT_T ID { insertSymbol((char*)$2, TYPE_TEXT); $$ = strcatN(3,"char* ",$2,";"); };
+DECLARATION	: NUMBER_T ID { insertSymbol((char*)$2, TYPE_NUMBER); $$ = newNode(INTEGER,strcatN(3,"int ",$2,";")); }
+		| TEXT_T ID { insertSymbol((char*)$2, TYPE_TEXT); $$ = newNode(STRING, strcatN(3,"char* ",$2,";")); };
 
-DEFINITION	: NUMBER_T ID IS EXPRESSION { insertSymbol((char*)$2, TYPE_NUMBER); $$ = strcatN(5,"int ",$2,"=",$4,";"); }
-		| TEXT_T ID IS TEXT_C { insertSymbol((char*)$2, TYPE_TEXT); $$ = strcatN(5,"char* ",$2,"=",$4,";"); };
+DEFINITION	: NUMBER_T ID IS EXPRESSION { insertSymbol((char*)$2, TYPE_NUMBER);
+										if($4->type == STRING)
+											yyerror("Cant assign text to integer");
+										$$ = strcatN(5,"int ",$2,"=",$4,";"); }
+		| TEXT_T ID IS EXPRESSION { insertSymbol((char*)$2, TYPE_TEXT);
+								if($4->type == INTEGER)
+									yyerror("Cant assign integer to text");
+								$$ = strcatN(5,"char* ",$2,"=",$4,";"); };
 
-EXPRESSION	: LPARENT EXPRESSION RPARENT {$$ = strcatN(3,"(",$2,")");}
-		| EXPRESSION PLUS EXPRESSION {$$ = strcatN(5,"(",$1,")+(",$3,")");}
-		| EXPRESSION MINUS EXPRESSION {$$ = strcatN(5,"(",$1,")-(",$3,")");}
-		| EXPRESSION MUL EXPRESSION {$$ = strcatN(5,"(",$1,")*(",$3,")");}
-		| EXPRESSION DIV EXPRESSION {if(atoi($3) == 0)
-																	yyerror("divide by zero error");
-																		else
-																$$ = strcatN(5,"(",$1,")/(",$3,")");}
-		| EXPRESSION MOD EXPRESSION {if(atoi($3) == 0)
-																		yyerror("division by zero not defined");
-																		else
-																$$ = strcatN(5,"(",$1,")%(",$3,")");}
+EXPRESSION	: LPARENT EXPRESSION RPARENT {$$ = newNode($2->type, strcatN(3,"(",$2,")"));}
+		| EXPRESSION PLUS EXPRESSION {checkType($1->type, $3->type); 
+									if($1->type == STRING)
+									{
+										$$ = newNode(STRING, strcatN(2,$1,$3));
+									}
+									else
+										$$ = newNode($1->type, $2->strcatN(5,"(",$1,")+(",$3,")"));
+									}
+		| EXPRESSION MINUS EXPRESSION {if($1->type == STRING || $3->type == STRING)
+									{
+										yyerror("invalid operation - requires number type.")
+									}
+									else
+										$$ = newNode(INTEGER,strcatN(5,"(",$1,")-(",$3,")"));
+									}
+		| EXPRESSION MUL EXPRESSION {if($1->type == STRING || $3->type == STRING)
+									{
+										yyerror("invalid operation - requires number type.")
+									}
+									else
+										$$ = newNode(INTEGER, strcatN(5,"(",$1,")*(",$3,")"));
+									}
+		| EXPRESSION DIV EXPRESSION {if($1->type == STRING || $3->type == STRING)
+									{
+										yyerror("invalid operation - requires number type.")
+									}
+									else{
+										if(atoi($3) == 0)
+											yerror("divide by zero error");
+										else
+											$$ = newNode(INTEGER, strcatN(5,"(",$1,")/(",$3,")"));
 
-		| TERM  {$$ = $1;};
+									}};
+
+		| EXPRESSION MOD EXPRESSION {if($1->type == STRING || $3->type == STRING)
+									{
+										yyerror("invalid operation - requires number type.")
+									}
+									else
+									{
+										if(atoi($3) == 0)
+											yerror("division by zero not defined");
+										else
+											$$ = newNode(INTEGER, strcatN(5,"(",$1,")%(",$3,")"));
+									}};
+									
+
+		| TERM  {$$ = newNode($1->type,$1);};
 
 /* En C es lo mismo una expresion o una expresion logica pero
 quizas aca como es mas verborragico convenga separarlas*/
@@ -137,7 +179,7 @@ LOGEXP	: NOT LOGEXP {$$ = strcatN(3,"(!(",$2,"))");}
 	| EXPRESSION EQ EXPRESSION {$$ = strcatN(5,"(",$1,"==",$3,")");}
 	| EXPRESSION NE EXPRESSION {$$ = strcatN(5,"(",$1,"!=",$3,")");};
 
-TERM	: ID {$$ = $1;}
+TERM	: ID {$$ = newNode(,$1);}
 	| NUM_C {$$ = $1;}
 	| TEXT_C {$$ = $1;};
 
@@ -171,6 +213,13 @@ char* strcatN(int num, ...)
 	va_end(strings);
 	return ret;
 }
+
+void checkType(int t1, int t2)
+{
+	if(t1 != t2)
+		yyerror("Diferent datatypes error");
+}
+
 
 void insertSymbol(char * symbol, int symbolType)
 {
