@@ -101,7 +101,7 @@ LINE	: ASSIGNMENT {$$ = newNode(TYPE_TEXT, $1->string);}
 	| DEFINITION {$$ = newNode(TYPE_TEXT, $1->string);};
 
 STEND	: START BLOCK END {$$ = newNode(TYPE_TEXT,strcatN(3,"{\n", $2->string,"}\n"));};
-STEND	: START BLOCK END {$$ = newNode(TYPE_TEXT, strcatN(3,"{\n", $2->string,"}\n"))};
+STEND	: START BLOCK END {$$ = newNode(TYPE_TEXT, strcatN(3,"{\n", $2->string,"}\n"));};
 
 ASSIGNMENT	: ID IS EXPRESSION {checkType(getType($1->string), $3->type);
 								$$ = newNode($3->type,strcatN(4,$1->string,"=",$3->string,";"));};
@@ -131,21 +131,21 @@ EXPRESSION	: LPARENT EXPRESSION RPARENT {$$ = newNode($2->type, strcatN(3,"(",$2
 									}
 		| EXPRESSION MINUS EXPRESSION {if($1->type == TYPE_TEXT || $3->type == TYPE_TEXT)
 									{
-										yyerror("invalid operation - requires number type.")
+										yyerror("invalid operation - requires number type.");
 									}
 									else
 										$$ = newNode(TYPE_NUMBER,strcatN(5,"(",$1->string,")-(",$3->string,")"));
 									}
 		| EXPRESSION MUL EXPRESSION {if($1->type == TYPE_TEXT || $3->type == TYPE_TEXT)
 									{
-										yyerror("invalid operation * requires number type.")
+										yyerror("invalid operation * requires number type.");
 									}
 									else
 										$$ = newNode(TYPE_NUMBER, strcatN(5,"(",$1->string,")*(",$3->string,")"));
 									}
 		| EXPRESSION DIV EXPRESSION {if($1->type == TYPE_TEXT || $3->type == TYPE_TEXT)
 									{
-										yyerror("invalid operation / requires number type.")
+										yyerror("invalid operation / requires number type.");
 									}
 									else{
 										if(atoi($3->string) == 0)
@@ -157,7 +157,7 @@ EXPRESSION	: LPARENT EXPRESSION RPARENT {$$ = newNode($2->type, strcatN(3,"(",$2
 
 		| EXPRESSION MOD EXPRESSION {if($1->type == TYPE_TEXT || $3->type == TYPE_TEXT)
 									{
-										yyerror("invalid operation % requires number type.")
+										yyerror("invalid operation % requires number type.");
 									}
 									else
 									{
