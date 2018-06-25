@@ -14,18 +14,19 @@
 	extern int yylex();
 	extern int linenum;
 
-	char symbolTable[MAX_SYMBOL_LENGTH][MAX_SYMBOLS];
-	int symbols = 0, symbolType[MAX_SYMBOLS];
-	int index;
+	char symbolsTable[MAX_SYMBOL_LENGTH][MAX_SYMBOLS];
+	int symbols = 0, symbolsType[MAX_SYMBOLS];
 
-	void yyerror(cont char* s);
+	void yyerror(const char * s);
+	char* strcatN(int num, ...);
+	void insertSymbol(char * symbol, int symbolType);
+
 %}
 
 %union
 {
 	char* string;
 }
-
 
 
 %token<string> NUMBER_T
@@ -91,12 +92,11 @@ BLOCK 	: LINE END_STATEMENT {$$ = strcatN(2, $1, "\n");}
 	| DO STEND WHILE LOGEXP {$$ = strcatN(5, "do\n", $2,"while(", $4, ");\n");}
 	| LINE END_STATEMENT BLOCK {$$ = strcatN(3, $1, "\n", $3);};
 
-LINE	: ASSIGNMENT {$$ = $1}
-	| DECLARATION {$$ = $1}
-	| DEFINITION {$$ = $1}
-	;
+LINE	: ASSIGNMENT {$$ = $1;}
+	| DECLARATION {$$ = $1;}
+	| DEFINITION {$$ = $1;};
 
-STEND	: START BLOCK END {$$ = strcatN(3,"{\n", $2,"}\n")};
+STEND	: START BLOCK END {$$ = strcatN(3,"{\n", $2,"}\n");};
 
 ASSIGNMENT	: ID IS EXPRESSION {$$ = strcatN(4,$1,"=",$3,";");};
 
@@ -107,17 +107,17 @@ DEFINITION	: NUMBER_T ID IS EXPRESSION { insertSymbol((char*)$2, TYPE_NUMBER); $
 		| TEXT_T ID IS TEXT_C { insertSymbol((char*)$2, TYPE_TEXT); $$ = strcatN(5,"char* ",$2,"=",$4,";"); };
 
 EXPRESSION	: LPARENT EXPRESSION RPARENT {$$ = strcatN(3,"(",$2,")");}
-		| EXPRESSION PLUS EXPRESSION {$$ = strcatN(5,"(",$1,")+(",$3,")";}
-		| EXPRESSION MINUS EXPRESSION {$$ = strcatN(5,"(",$1,")-(",$3,")";}
-		| EXPRESSION MUL EXPRESSION {$$ = strcatN(5,"(",$1,")*(",$3,")";}
+		| EXPRESSION PLUS EXPRESSION {$$ = strcatN(5,"(",$1,")+(",$3,")");}
+		| EXPRESSION MINUS EXPRESSION {$$ = strcatN(5,"(",$1,")-(",$3,")");}
+		| EXPRESSION MUL EXPRESSION {$$ = strcatN(5,"(",$1,")*(",$3,")");}
 		| EXPRESSION DIV EXPRESSION {if(atoi($3) == 0)
-																	yerror("divide by zero error");
+																	yyerror("divide by zero error");
 																		else
-																$$ = strcatN(5,"(",$1,")/(",$3,")";}
+																$$ = strcatN(5,"(",$1,")/(",$3,")");}
 		| EXPRESSION MOD EXPRESSION {if(atoi($3) == 0)
-																		yerror("division by zero not defined");
+																		yyerror("division by zero not defined");
 																		else
-																$$ = strcatN(5,"(",$1,")%(",$3,")";};
+																$$ = strcatN(5,"(",$1,")%(",$3,")");}
 
 		| TERM  {$$ = $1;};
 
@@ -143,7 +143,7 @@ TERM	: ID {$$ = $1;}
 
 %%
 
-void yyerror(char const* s)
+void yyerror(const char * s)
 {
 	printf(stderr, "ERROR: %s on line %d\n", s, linenum);
 	exit(1);
@@ -159,14 +159,14 @@ char* strcatN(int num, ...)
 	toAdd = va_arg(strings, char*);
 
 	length = strlen(toAdd + 1);
-	ret = (char*)malloc(sizeof(char) * length));
+	ret = (char*)malloc(sizeof(char) * length);
 	strcpy(ret, toAdd);
 	for(i = 1; i < num ; i++)
 	{
 		toAdd = va_arg(strings, char*);
 		length += strlen(toAdd);
-		ret = (char*)realloc(args, length * sizeof(char));
-		strcat(args, toAdd);
+		ret = (char*)realloc(ret, length * sizeof(char));
+		strcat(ret, toAdd);
 	}
 	va_end(strings);
 	return ret;
@@ -174,17 +174,18 @@ char* strcatN(int num, ...)
 
 void insertSymbol(char * symbol, int symbolType)
 {
+	int index;
  	for(index = 0; index < symbols; index++) {
-		if(strcmp(symbol, symbolTable[index]) == 0) {
-			if(type[i] == symbolType)
+		if(strcmp(symbol, symbolsTable[index]) == 0) {
+			if(symbolsType[index] == symbolType)
 				yyerror("Redeclaration of variable");
 			else
 				yyerror("Multiple Declaration of Variable");
 		}
 	}
 
-	symbolType[symbols] = symbolType;
-	strcpy(symbolTable[symbols], symbol);
+	symbolsType[symbols] = symbolType;
+	strcpy(symbolsTable[symbols], symbol);
 	symbols++;
 }
 

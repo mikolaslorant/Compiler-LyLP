@@ -55,7 +55,7 @@ digit [0-9]
 								if(open_parentheses < 0)
 									yyerror("extra closing parentheses");
 								else
-									return RPAREN;
+									return RPARENT;
 								}
 "["								yyerror("unrecognized token [");
 "]"								yyerror("unrecognized token ]");
