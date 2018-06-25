@@ -8,6 +8,7 @@
 	#define MAX_SYMBOLS 100
 	#define MAX_SYMBOL_LENGTH 100
 
+	#define TYPE_NOTFOUND 0
 	#define TYPE_NUMBER 1
 	#define TYPE_TEXT 2
 
@@ -20,6 +21,7 @@
 	void yyerror(const char * s);
 	char* strcatN(int num, ...);
 	void insertSymbol(char * symbol, int symbolType);
+	int getType(char * symbol);
 
 %}
 
@@ -236,6 +238,18 @@ void insertSymbol(char * symbol, int symbolType)
 	symbolsType[symbols] = symbolType;
 	strcpy(symbolsTable[symbols], symbol);
 	symbols++;
+}
+
+int getType(char * symbol) 
+{
+	int index;
+	for(index = 0; index < symbols; index++) {
+		if(strcmp(symbol, symbolsTable[index]) == 0) {
+			return symbolsType[index];
+		}
+	}
+
+	return TYPE_NOTFOUND;
 }
 
 int main(void){
