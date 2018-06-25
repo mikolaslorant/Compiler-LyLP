@@ -88,7 +88,7 @@
 %%
 
 /* Producciones */
-PROGRAM		: STEND {printf("%s",strcatN(3,"#include <stdio.h>\nint main(void)\n{",$1->string,"\n}"));};
+PROGRAM		: STEND {printf("%s",strcatN(3,"#include <stdio.h>\nint main(void)\n",$1->string,"\n"));};
 
 /* Defino block como un bloque generico de codigo */
 BLOCK 	: LINE END_STATEMENT {$$ = newNode(TYPE_TEXT, strcatN(2, $1->string, "\n"));}
