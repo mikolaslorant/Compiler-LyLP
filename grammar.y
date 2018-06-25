@@ -1,10 +1,10 @@
-/*https://www.tutorialspoint.com/cprogramming/c_variable_arguments.htm*/
 %{
+	#include "node.h"
 	#include <stdio.h>
 	#include <stdlib.h>
 	#include <stdarg.h>
 	#include <string.h>
-	#include "./node.h"
+	
 
 	#define MAX_SYMBOLS 100
 	#define MAX_SYMBOL_LENGTH 100
@@ -29,7 +29,7 @@
 
 %union
 {
-	Node* node;
+	Node *node;
 }
 
 
@@ -100,7 +100,6 @@ LINE	: ASSIGNMENT {$$ = newNode(TYPE_TEXT, $1->string);}
 	| DECLARATION {$$ = newNode(TYPE_TEXT, $1->string);}
 	| DEFINITION {$$ = newNode(TYPE_TEXT, $1->string);};
 
-STEND	: START BLOCK END {$$ = newNode(TYPE_TEXT,strcatN(3,"{\n", $2->string,"}\n"));};
 STEND	: START BLOCK END {$$ = newNode(TYPE_TEXT, strcatN(3,"{\n", $2->string,"}\n"));};
 
 ASSIGNMENT	: ID IS EXPRESSION {checkType(getType($1->string), $3->type);

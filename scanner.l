@@ -11,10 +11,10 @@ Code for alpha and digit https://github.com/faturita/YetAnotherCompilerClass/blo
 */
 
 %{
+#include "node.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "y.tab.h"
-#include "./node.h"
 
 #define TYPE_NOTFOUND 0
 #define TYPE_NUMBER 1
@@ -103,8 +103,8 @@ digit [0-9]
 
 "/*" 							BEGIN(comment);
 <comment>[^*\n]*
-<commment>"*"+[^*/\n]*
-<INITIAL>\n 					++linenum;
+<comment>"*"+[^*/\n]*
+
 <comment>"*"+"/"				BEGIN(INITIAL);
 
 %%
