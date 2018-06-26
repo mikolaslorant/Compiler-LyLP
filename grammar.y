@@ -52,6 +52,7 @@
 %token AND
 %token OR
 %token SEE
+%token SHOUT
 %token<node> IF
 %token<node> ELSE
 %token<node> DO
@@ -88,8 +89,9 @@
 %%
 
 /* Producciones */
-PROGRAM		: STEND {printf("%s",strcatN(5,"#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n",
+PROGRAM		: STEND {printf("%s",strcatN(6,"#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include <ctype.h>\n",
 	"char* strcatP(char* s1, char* s2){ char *ret =calloc(strlen(s1)+strlen(s2)+1,sizeof(char));strcpy(ret,s1);return strcat(ret,s2);}\n",
+	"char* toUpperString(char *s){int i; int l = strlen(s);char* ret =calloc(l+2,sizeof(char));ret[l] = '!';for(i = 0; i< l; i++)ret[i] = toupper(s[i]); return ret;}\n",
 	"int main(void)\n",$1->string,"\n"));};
 
 /* Defino block como un bloque generico de codigo */
@@ -107,6 +109,11 @@ LINE	: ASSIGNMENT {$$ = newNode(TYPE_TEXT, $1->string);}
 	| DEFINITION {$$ = newNode(TYPE_TEXT, $1->string);}
 	| SEE EXPRESSION {if($2->type == TYPE_TEXT)
 						$$ = newNode(TYPE_TEXT, strcatN(5,"printf(\"%s","\\n","\",", $2->string, ");"));
+					else
+						$$ = newNode(TYPE_TEXT, strcatN(5,"printf(\"%d","\\n","\",", $2->string, ");"));
+					}
+	| SHOUT EXPRESSION {if($2->type == TYPE_TEXT)
+						$$ = newNode(TYPE_TEXT, strcatN(6,"printf(\"%s","\\n","\",","toUpperString(", $2->string, "));"));
 					else
 						$$ = newNode(TYPE_TEXT, strcatN(5,"printf(\"%d","\\n","\",", $2->string, ");"));
 					};

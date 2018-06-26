@@ -83,7 +83,7 @@ digit [0-9]
 "not"							return NOT;
 
 "see"							return SEE;
-
+"shout"							return SHOUT;
 
 
 "." 							return END_STATEMENT;
