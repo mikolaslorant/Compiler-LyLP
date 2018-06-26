@@ -1,0 +1,23 @@
+start
+
+text str is "some test string".
+text str2 is "string test 2".
+text str3.
+number c is 486.
+number d is 7.
+number r is c-d.
+
+	if r is less than c
+		start
+			d is d + c.
+			see d.
+			str3 is str + str2.
+			see str.
+		end
+	
+	see r.
+	see c.
+	see str2.
+
+end
+

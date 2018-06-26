@@ -1,0 +1,17 @@
+
+
+start
+
+
+number a is 0.
+text str is "Value of a is:".
+do
+	start 
+		a is a + 1.
+		see str.
+		see a.
+	end
+
+while(a is less than 100)
+
+end
