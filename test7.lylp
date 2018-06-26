@@ -1,0 +1,8 @@
+start
+
+number a is 10.
+text a is "10".
+
+see number + a.
+
+end

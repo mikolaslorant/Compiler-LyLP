@@ -316,7 +316,7 @@ char* strcatN(int num, ...)
 void checkType(int t1, int t2)
 {
 	if(t1 != t2)
-		yyerror("Diferent datatypes error");
+		yyerror("Different datatypes error");
 }
 
 
