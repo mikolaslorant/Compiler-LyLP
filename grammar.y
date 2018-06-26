@@ -88,7 +88,9 @@
 %%
 
 /* Producciones */
-PROGRAM		: STEND {printf("%s",strcatN(3,"#include <stdio.h>\n#include <string.h>\nint main(void)\n",$1->string,"\n"));};
+PROGRAM		: STEND {printf("%s",strcatN(5,"#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n",
+	"char* strcatP(char* s1, char* s2){ char *ret =calloc(strlen(s1)+strlen(s2)+1,sizeof(char));strcpy(ret,s1);return strcat(ret,s2);}\n",
+	"int main(void)\n",$1->string,"\n"));};
 
 /* Defino block como un bloque generico de codigo */
 BLOCK 	: LINE END_STATEMENT {$$ = newNode(TYPE_TEXT, strcatN(2, $1->string, "\n"));}
@@ -133,7 +135,7 @@ EXPRESSION	: LPARENT EXPRESSION RPARENT {$$ = newNode($2->type, strcatN(3,"(",$2
 		| EXPRESSION PLUS EXPRESSION {checkType($1->type, $3->type); 
 									if($1->type == TYPE_TEXT)
 									{
-										$$ = newNode(TYPE_TEXT, strcatN(5,"strcat(",$1->string,",",$3->string,")"));
+										$$ = newNode(TYPE_TEXT, strcatN(5,"strcatP(",$1->string,",",$3->string,")"));
 									}
 									else
 										$$ = newNode(TYPE_NUMBER, strcatN(5,"(",$1->string,")+(",$3->string,")"));
