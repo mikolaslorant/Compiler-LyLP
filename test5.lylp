@@ -1,0 +1,20 @@
+start
+
+text a is "This is case A".
+text b is "This is case B".
+
+if a is greater than b
+	start
+		see a + " is greater than " + b.
+	end
+else
+	start
+		number n is 0.
+		do
+			start
+				see a + " is not greater than " + b.
+				n is n + 1.
+			end
+		while n is less than 5
+	end
+end
