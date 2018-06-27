@@ -204,10 +204,7 @@ LOGEXP	: NOT LOGEXP {$$ = newNode(TYPE_NUMBER, strcatN(3,"(!(",$2->string,"))"))
 								}
 								else
 								{
-									if(strcmp($1->string, $3->string) > 0)
-										$$ = newNode(TYPE_NUMBER, "(1)");
-									else 
-										$$ = newNode(TYPE_NUMBER, "(0)");
+									$$ = newNode(TYPE_NUMBER,strcatN(5,"(strcmp(", $1->string,",",$3->string,") > 0)"));
 								}}
 
 
@@ -218,10 +215,7 @@ LOGEXP	: NOT LOGEXP {$$ = newNode(TYPE_NUMBER, strcatN(3,"(!(",$2->string,"))"))
 								}
 								else
 								{
-									if(strcmp($1->string, $3->string) < 0)
-										$$ = newNode(TYPE_NUMBER, "(1)");
-									else 
-										$$ = newNode(TYPE_NUMBER, "(0)");
+									$$ = newNode(TYPE_NUMBER,strcatN(5,"(strcmp(", $1->string,",",$3->string,") < 0)"));
 								}}
 								
 	| EXPRESSION LE EXPRESSION {checkType($1->type, $3->type);
@@ -231,10 +225,7 @@ LOGEXP	: NOT LOGEXP {$$ = newNode(TYPE_NUMBER, strcatN(3,"(!(",$2->string,"))"))
 								}
 								else
 								{
-									if(strcmp($1->string, $3->string) <= 0)
-										$$ = newNode(TYPE_NUMBER, "(1)");
-									else 
-										$$ = newNode(TYPE_NUMBER, "(0)");
+									$$ = newNode(TYPE_NUMBER,strcatN(5,"(strcmp(", $1->string,",",$3->string,") <= 0)"));
 								}}
 		
 	| EXPRESSION GE EXPRESSION {checkType($1->type, $3->type);
@@ -244,10 +235,7 @@ LOGEXP	: NOT LOGEXP {$$ = newNode(TYPE_NUMBER, strcatN(3,"(!(",$2->string,"))"))
 								}
 								else
 								{
-									if(strcmp($1->string, $3->string) >= 0)
-										$$ = newNode(TYPE_NUMBER, "(1)");
-									else 
-										$$ = newNode(TYPE_NUMBER, "(0)");
+									$$ = newNode(TYPE_NUMBER,strcatN(5,"(strcmp(", $1->string,",",$3->string,") >= 0)"));
 								}}
 		
 	| EXPRESSION EQ EXPRESSION {checkType($1->type, $3->type);
@@ -257,10 +245,7 @@ LOGEXP	: NOT LOGEXP {$$ = newNode(TYPE_NUMBER, strcatN(3,"(!(",$2->string,"))"))
 								}
 								else
 								{
-									if(strcmp($1->string, $3->string) == 0)
-										$$ = newNode(TYPE_NUMBER, "(1)");
-									else 
-										$$ = newNode(TYPE_NUMBER, "(0)");
+									$$ = newNode(TYPE_NUMBER,strcatN(5,"(strcmp(", $1->string,",",$3->string,") == 0)"));
 								}}
 	| EXPRESSION NE EXPRESSION {checkType($1->type, $3->type);
 								if($1->type == TYPE_NUMBER)
@@ -269,10 +254,7 @@ LOGEXP	: NOT LOGEXP {$$ = newNode(TYPE_NUMBER, strcatN(3,"(!(",$2->string,"))"))
 								}
 								else
 								{
-									if(strcmp($1->string, $3->string) != 0)
-										$$ = newNode(TYPE_NUMBER, "(1)");
-									else 
-										$$ = newNode(TYPE_NUMBER, "(0)");
+									$$ = newNode(TYPE_NUMBER,strcatN(5,"(strcmp(", $1->string,",",$3->string,") != 0)"));
 								}}
 
 TERM	: ID {$$ = newNode(getType($1->string),$1->string);}
