@@ -1,7 +1,7 @@
 start
 
-text a is "This is case A".
-text b is "This is case B".
+text a is "Message A".
+text b is "Message B".
 
 if a is greater than b
 	start
